@@ -29,8 +29,10 @@ struct Stack {
 
 //sub-program yang menggunakan Doubly Linked List
 void createList(List &L);
-void insertLine(List &L, int position, infotype text);
-void deleteLine(List &L, int position);
+address createElementList(infotype data);
+int countElementList(List L);    //digunakan sebagai pengganti index, agar mempermudah implementasi sub-program yang menggunakan parameter position
+void insertLine(List &L, int position, address P);
+void deleteLine(List &L, int position, address P);
 void displayText(List &L);
 void navigasiCepat(List &L, int lineNumber);
 void copyPaste(List &L, int fromLine, int toLine);
