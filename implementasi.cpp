@@ -110,3 +110,7 @@ void displayText(List &L) {
 
     cout << endl;
 }
+
+
+
+// BATAS IMPLEMENTASI BY RIZKA ANANDA PRATAMA
