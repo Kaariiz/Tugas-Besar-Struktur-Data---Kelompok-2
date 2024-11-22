@@ -1,4 +1,4 @@
-DESKRIPSI PROJECT - TEXT EDITOR
+DESKRIPSI PROJECT - TEXT EDITOR,
 project ini bertujuan untuk mengembangkan sebuah text editor sederhana berbasis struktur data yang mendukung 
 berbagai operasi manipulasi teks. Text editor ini dirancang menggunakan Doubly Linked List dan Stack.
 Doubly Linked List digunkan sebagai struktur data utama untuk menyimpan teks dalam bentuk string, dengan 
