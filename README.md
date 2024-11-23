@@ -40,3 +40,16 @@ DESKIRPSI FITUR-FITUR
 8. Fitur copy/paste
    pengguna dapat menyalin bagian tertentu dari teks dan meempelkannya ke posisi lain dalam dokumen.
    fitur ini mendukung fleksibilitas dalam pengelolaan konten.
+
+
+
+CARA MENJALANKAN PROGRAM:
+
+
+
+
+
+DAFTAR ANGGOTA KELOMPOK:
+1. Rizka Ananda Pratama   103052300012
+2. Agnes Valerie          103052300040
+3. Komang Yoga Suputra    103052330046
