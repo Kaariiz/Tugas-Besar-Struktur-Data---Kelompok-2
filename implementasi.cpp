@@ -113,4 +113,6 @@ void displayText(List &L) {
 
 
 
+
+
 // BATAS IMPLEMENTASI BY RIZKA ANANDA PRATAMA
