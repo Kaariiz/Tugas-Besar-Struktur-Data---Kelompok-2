@@ -23,7 +23,7 @@ DESKIRPSI FITUR-FITUR
 
 4. Fitur undo/redo
    dengan fitur undo, pengguna dapat membatalkan operasi terakhir yang dilakukan. sebaliknya, fitur
-   redo memnungkinkanpengguna untuk mengulangi operasi yang telah dibatalkan sebelumnya.
+   redo memungkinkan pengguna untuk mengulangi operasi yang telah dibatalkan sebelumnya.
 
 5. Pencarian kata
    fitur ini memudahkan pengguna untuk mencari kata atau frasa tertentu di dalam dokumen. pencarian
