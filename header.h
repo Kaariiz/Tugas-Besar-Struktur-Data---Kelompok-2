@@ -10,6 +10,12 @@ const int MAX_STACK = 100;
 
 typedef string infotype;
 typedef struct ElementList *address;
+struct infotypeStck{
+    address node;
+    address beforenode;
+    address afternode;
+    bool IL, DL;
+};
 
 struct ElementList {
     infotype info;
@@ -23,7 +29,7 @@ struct List {
 };
 
 struct Stack {
-    infotype info[MAX_STACK];
+    infotypeStck info[MAX_STACK];
     int top;
 };
 
@@ -43,8 +49,8 @@ void replaceWord(List &L, infotype oldWord, infotype newWord);
 void createStack(Stack &S);
 bool isEmpty(Stack S);
 bool isFull(Stack S);
-void push(Stack &S, infotype P);
-void pop(Stack &S, infotype &operation);
+void push(Stack &S, infotypeStck P);
+void pop(Stack &S, infotypeStck &operation);
 void undo(List &L, Stack &undoStack, Stack &redoStack);
 void redo(List &L, Stack &undoStack, Stack &redoStack);
 

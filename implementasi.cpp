@@ -33,7 +33,8 @@ int countElementList(List L) {
     return Count;
 }
 
-void deleteLine(List &L, int position, address P) {
+void deleteLine(List &L, int position, address P, Stack &Undo, Stack &Redo) {
+    infotypeStck Q;
     int totalElement;
     totalElement = countElementList(L);
 
@@ -47,25 +48,45 @@ void deleteLine(List &L, int position, address P) {
         if (position == 1) {
             if (L.first->next == nullptr) {
                 P = L.first;
+                Q.node = P;
+                Q.beforenode = P->prev;
+                Q.afternode = P->next;
                 L.first = nullptr;  //sepertinya bisa di pangkas
                 L.last = nullptr;
+                Q.DL = true;
+                Q.IL = false;
             } else {
                 P = L.first;
                 L.first = P->next;
+                Q.node = P;
+                Q.beforenode = P->prev;
+                Q.afternode = P->next;
                 P->next = nullptr;
                 L.first->prev = nullptr;
+                Q.DL = true;
+                Q.IL = false;
             }
 
         } else if (position == totalElement) {
             if (L.first->next == nullptr) {
                 P = L.first;
+                Q.node = P;
+                Q.beforenode = P->prev;
+                Q.afternode = P->next;
                 L.first = nullptr; // sepertinya bisa dipangkas
                 L.last = nullptr;
+                Q.DL = true;
+                Q.IL = false;
             } else {
                 P = L.last;
                 L.last = L.last->prev;
+                Q.node = P;
+                Q.beforenode = P->prev;
+                Q.afternode = P->next;
                 P->prev = nullptr;
                 L.last->next = nullptr;
+                Q.DL = true;
+                Q.IL = false;
             }
 
         } else {
@@ -79,19 +100,24 @@ void deleteLine(List &L, int position, address P) {
                 tempL = tempL->next;
             }
 
-            address Q;
-            Q = tempL->prev;
             P = tempL;
 
-            Q->next = P->next;  //bisa di persingkat, tidak usah Q
-            P->next->prev = Q;
+            P->prev->next = P->next;
+            P->next->prev = P->prev;
+            Q.node = P;
+            Q.beforenode = P->prev;
+            Q.afternode = P->next;
             P->next = nullptr;
             P->prev = nullptr;
+            Q.DL = true;
+            Q.IL = false;
         }
 
         cout << "Text dengan posisi tersebut telah berhasil dihapus!" << endl;
         cout << "Text yang dihapus adalah: " << P->info << endl;
     }
+    push(Undo,Q);
+    delete P;
 }
 
 void displayText(List &L) {
@@ -115,7 +141,8 @@ void displayText(List &L) {
 
 // BATAS IMPLEMENTASI BY RIZKA ANANDA PRATAMA
 
-void insertLine(List &L, int position, address P) {
+void insertLine(List &L, int position, address P, Stack &Undo, Stack &Redo) {
+    infotypeStck Q;
     if (position <= 0 || position > countElementList(L) + 1) {
         cout << "Invalid position!\n";
     } else if (L.first == nullptr) {
@@ -131,7 +158,7 @@ void insertLine(List &L, int position, address P) {
         L.last = P;
     } else {
         address Q = L.first;
-        for (int i = 1; i < position - 1; i++) {
+        for (int i = 1; i <= position - 1; i++) {
             Q = Q->next;
         }
         P->next = Q->next;
@@ -139,6 +166,11 @@ void insertLine(List &L, int position, address P) {
         Q->next->prev = P;
         Q->next = P;
     }
+    Q.node = P;
+    Q.beforenode = P->prev;
+    Q.afternode = P->next;
+    Q.DL = false;
+    Q.IL = true;
 }
 
 void createStack(Stack &S){
@@ -153,7 +185,7 @@ bool isFull(Stack S){
     return S.top == MAX_STACK;
 }
 
-void push(Stack &S, infotype P){
+void push(Stack &S, infotypeStck P){
     if (!isFull(S)){
         S.top++;
         S.info[S.top] = P;
@@ -162,7 +194,7 @@ void push(Stack &S, infotype P){
     }
 }
 
-void pop(Stack &S, infotype &operation){
+void pop(Stack &S, infotypeStck &operation){
     if (!isEmpty(S)){
         S.info[S.top] = operation;
         S.top--;
@@ -173,7 +205,7 @@ void pop(Stack &S, infotype &operation){
 
 void undo(List &L, Stack &undoStack, Stack &redoStack, bool IL, bool DL, address P, address Q){
     if (IL){
-        
+
     } else if (DL){
 
     }

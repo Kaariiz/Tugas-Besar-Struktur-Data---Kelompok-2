@@ -15,7 +15,7 @@ bool isFull(Stack S){
     return S.top == MAX_STACK;
 }
 
-void push(Stack &S, infotype P){
+void push(Stack &S, infotypeStck P){
     if (!isFull(S)){
         S.top++;
         S.info[S.top] = P;
@@ -24,7 +24,7 @@ void push(Stack &S, infotype P){
     }
 }
 
-void pop(Stack &S, infotype &operation){
+void pop(Stack &S, infotypeStck &operation){
     if (!isEmpty(S)){
         S.info[S.top] = operation;
         S.top--;
