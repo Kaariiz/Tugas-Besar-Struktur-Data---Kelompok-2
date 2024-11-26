@@ -47,7 +47,7 @@ void deleteLine(List &L, int position, address P) {
         if (position == 1) {
             if (L.first->next == nullptr) {
                 P = L.first;
-                L.first = nullptr;
+                L.first = nullptr;  //sepertinya bisa di pangkas
                 L.last = nullptr;
             } else {
                 P = L.first;
@@ -59,7 +59,7 @@ void deleteLine(List &L, int position, address P) {
         } else if (position == totalElement) {
             if (L.first->next == nullptr) {
                 P = L.first;
-                L.first = nullptr;
+                L.first = nullptr; // sepertinya bisa dipangkas
                 L.last = nullptr;
             } else {
                 P = L.last;
@@ -83,7 +83,7 @@ void deleteLine(List &L, int position, address P) {
             Q = tempL->prev;
             P = tempL;
 
-            Q->next = P->next;
+            Q->next = P->next;  //bisa di persingkat, tidak usah Q
             P->next->prev = Q;
             P->next = nullptr;
             P->prev = nullptr;
@@ -113,6 +113,72 @@ void displayText(List &L) {
 
 
 
-
-
 // BATAS IMPLEMENTASI BY RIZKA ANANDA PRATAMA
+
+void insertLine(List &L, int position, address P) {
+    if (position <= 0 || position > countElementList(L) + 1) {
+        cout << "Invalid position!\n";
+    } else if (L.first == nullptr) {
+        L.first = P;
+        L.last = P;
+    } else if (position == 1) {
+        P->next = L.first;
+        L.first->prev = P;
+        L.first = P;
+    } else if (position == countElementList(L) + 1) {
+        P->prev = L.last;
+        L.last->next = P;
+        L.last = P;
+    } else {
+        address Q = L.first;
+        for (int i = 1; i < position - 1; i++) {
+            Q = Q->next;
+        }
+        P->next = Q->next;
+        P->prev = Q;
+        Q->next->prev = P;
+        Q->next = P;
+    }
+}
+
+void createStack(Stack &S){
+    S.top = 0;
+}
+
+bool isEmpty(Stack S){
+    return S.top == 0;
+}
+
+bool isFull(Stack S){
+    return S.top == MAX_STACK;
+}
+
+void push(Stack &S, infotype P){
+    if (!isFull(S)){
+        S.top++;
+        S.info[S.top] = P;
+    } else {
+        cout << "Stack Penuh";
+    }
+}
+
+void pop(Stack &S, infotype &operation){
+    if (!isEmpty(S)){
+        S.info[S.top] = operation;
+        S.top--;
+    } else {
+        cout << "Stack Kosong";
+    }
+}
+
+void undo(List &L, Stack &undoStack, Stack &redoStack, bool IL, bool DL, address P, address Q){
+    if (IL){
+        
+    } else if (DL){
+
+    }
+}
+
+void redo(List &L, Stack &undoStack, Stack &redoStack){
+    
+}

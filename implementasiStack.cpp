@@ -32,7 +32,15 @@ void pop(Stack &S, infotype &operation){
         cout << "Stack Kosong";
     }
 }
-void undo(List &L, Stack &undoStack, Stack &redoStack){
+
+void undo(List &L, Stack &undoStack, Stack &redoStack, bool IL, bool DL, address P, address Q){
+    if (IL){
+        
+    } else if (DL){
+
+    }
+}
+
+void redo(List &L, Stack &undoStack, Stack &redoStack){
     
 }
-void redo(List &L, Stack &undoStack, Stack &redoStack);
