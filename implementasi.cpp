@@ -206,7 +206,7 @@ void pop(Stack &S, infotypeStck &operation){
 void undo(List &L, Stack &undoStack, Stack &redoStack, bool IL, bool DL, address P, address Q){
     if (IL){
 
-    } if (DL){
+    } else if (DL){
 
     }
 }
