@@ -33,7 +33,7 @@ int countElementList(List L) {
     return Count;
 }
 
-void deleteLine(List &L, int position, address P, Stack &Undo, Stack &Redo) {
+void deleteLine(List &L, int position, address P, Stack &Undo) {
     infotypeStck Q;
     int totalElement;
     totalElement = countElementList(L);
@@ -171,6 +171,7 @@ void insertLine(List &L, int position, address P, Stack &Undo, Stack &Redo) {
     Q.afternode = P->next;
     Q.DL = false;
     Q.IL = true;
+    push(Undo,Q);
 }
 
 void createStack(Stack &S){
@@ -204,10 +205,80 @@ void pop(Stack &S, infotypeStck &operation){
 }
 
 void undo(List &L, Stack &undoStack, Stack &redoStack){
-    if (IL){
-
-    } else if (DL){
-
+    infotypeStck Q;
+    address temp = L.first;
+    if (!isEmpty(undoStack)){
+        pop(undoStack, Q);
+        if (Q.IL){
+            while(temp != nullptr && temp->info != Q.node->info){
+                temp = temp ->next;
+            }
+            if (temp ->next == nullptr && temp ->prev == nullptr){
+                L.first = nullptr;
+                L.last = nullptr;
+                Q.DL = true;
+                Q.IL = false;
+                push(redoStack, Q);
+                delete temp;
+            } else if(temp ->next == nullptr) {
+                L.last = temp ->prev;
+                L.last ->next = nullptr;
+                Q.DL = true;
+                Q.IL = false;
+                push(redoStack, Q);
+                delete temp;
+            } else if(temp ->prev == nullptr){
+                L.first = temp ->next;
+                L.first ->prev = nullptr;
+                Q.DL = true;
+                Q.IL = false;
+                push(redoStack, Q);
+                delete temp;
+            } else {
+                temp->prev->next = temp ->next;
+                temp->next->prev = temp ->prev;
+                temp ->next = nullptr;
+                temp ->prev = nullptr;
+                Q.DL = true;
+                Q.IL = false;
+                push(redoStack, Q);
+                delete temp;
+            }
+        } else if (Q.DL){
+            if (temp == nullptr){
+                L.first = Q.node;
+                L.last = Q.node;
+                Q.DL = false;
+                Q.IL = true;
+                push(redoStack, Q);
+                delete temp;
+            } else if(temp ->next == nullptr) {
+                L.last = temp ->prev;
+                L.last ->next = nullptr;
+                Q.DL = true;
+                Q.IL = false;
+                push(redoStack, Q);
+                delete temp;
+            } else if(temp ->prev == nullptr){
+                L.first = temp ->next;
+                L.first ->prev = nullptr;
+                Q.DL = true;
+                Q.IL = false;
+                push(redoStack, Q);
+                delete temp;
+            } else {
+                temp->prev->next = temp ->next;
+                temp->next->prev = temp ->prev;
+                temp ->next = nullptr;
+                temp ->prev = nullptr;
+                Q.DL = true;
+                Q.IL = false;
+                push(redoStack, Q);
+                delete temp;
+            }
+        }
+    } else {
+        cout << "Belum terdapat perubahan"<< endl;
     }
 }
 
