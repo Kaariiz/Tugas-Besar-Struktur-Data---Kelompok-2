@@ -137,6 +137,24 @@ void displayText(List &L) {
     cout << endl;
 }
 
+void copyPaste_103052300012(List &L, int fromLine, int toLine) {
+    // validasi posisi baris yang diminta
+    if (fromLine < 1 || fromLine > L.totalLines || toLine < 1 || toLine > L.totalLines + 1) {
+        cout << "Nomor baris tidak valid!" << endl;
+        return;
+    } 
+
+    // navigasi ke baris yang akan disalin
+    adrNode temp = L.first;
+    for (int i = 1; i < fromLine; i++) {
+        temp = temp->next;
+    }
+
+    // salin isi dari fromLine ke toLine
+    if (temp != nullptr) {
+        insertLine_103052300012(L, toLine, temp->info);
+    }
+}
 
 
 // BATAS IMPLEMENTASI BY RIZKA ANANDA PRATAMA
