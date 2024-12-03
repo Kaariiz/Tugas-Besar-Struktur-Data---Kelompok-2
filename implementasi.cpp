@@ -6,7 +6,6 @@ using namespace std;
 void createList(List &L) {
     L.first = nullptr;
     L.last = nullptr;
-    halooo;
 }
 
 address createElementList(infotype data) {
@@ -191,6 +190,7 @@ void insertLine(List &L, int position, address P, Stack &Undo, Stack &Redo) {
     Q.DL = false;
     Q.IL = true;
     push(Undo,Q);
+    clearRedo(Redo);
 }
 
 void createStack(Stack &S){
@@ -225,75 +225,80 @@ void pop(Stack &S, infotypeStck &operation){
 
 void undo(List &L, Stack &undoStack, Stack &redoStack){
     infotypeStck Q;
-    address temp = L.first;
+    address temp1 = L.first; 
     if (!isEmpty(undoStack)){
         pop(undoStack, Q);
         if (Q.IL){
-            while(temp != nullptr && temp->info != Q.node->info){
-                temp = temp ->next;
+            while(temp1 != nullptr && temp1->info != Q.node->info){
+                temp1 = temp1 ->next;
             }
-            if (temp ->next == nullptr && temp ->prev == nullptr){
+            if (temp1 ->next == nullptr && temp1 ->prev == nullptr){
                 L.first = nullptr;
                 L.last = nullptr;
                 Q.DL = true;
                 Q.IL = false;
                 push(redoStack, Q);
-                delete temp;
-            } else if(temp ->next == nullptr) {
-                L.last = temp ->prev;
+                delete temp1;
+            } else if(temp1 ->next == nullptr) {
+                L.last = temp1 ->prev;
                 L.last ->next = nullptr;
                 Q.DL = true;
                 Q.IL = false;
                 push(redoStack, Q);
-                delete temp;
-            } else if(temp ->prev == nullptr){
-                L.first = temp ->next;
+                delete temp1;
+            } else if(temp1 ->prev == nullptr){
+                L.first = temp1 ->next;
                 L.first ->prev = nullptr;
                 Q.DL = true;
                 Q.IL = false;
                 push(redoStack, Q);
-                delete temp;
+                delete temp1;
             } else {
-                temp->prev->next = temp ->next;
-                temp->next->prev = temp ->prev;
-                temp ->next = nullptr;
-                temp ->prev = nullptr;
+                temp1->prev->next = temp1 ->next;
+                temp1->next->prev = temp1 ->prev;
+                temp1 ->next = nullptr;
+                temp1 ->prev = nullptr;
                 Q.DL = true;
                 Q.IL = false;
                 push(redoStack, Q);
-                delete temp;
+                delete temp1;
             }
         } else if (Q.DL){
-            if (temp == nullptr){
-                L.first = Q.node;
-                L.last = Q.node;
+            if (Q.beforenode == nullptr && Q.afternode == nullptr){
+                duplicatenode(temp1, Q.node);
+                L.first = temp1;
+                L.last = temp1;
                 Q.DL = false;
                 Q.IL = true;
                 push(redoStack, Q);
-                delete temp;
-            } else if(temp ->next == nullptr) {
-                L.last = temp ->prev;
-                L.last ->next = nullptr;
-                Q.DL = true;
-                Q.IL = false;
+            } else if(Q.afternode == nullptr) {
+                duplicatenode(temp1, Q.node);
+                temp1 ->prev = L.last;
+                L.last ->next = temp1;
+                L.last = temp1;
+                Q.DL = false;
+                Q.IL = true;
                 push(redoStack, Q);
-                delete temp;
-            } else if(temp ->prev == nullptr){
-                L.first = temp ->next;
-                L.first ->prev = nullptr;
-                Q.DL = true;
-                Q.IL = false;
+            } else if(Q.beforenode == nullptr){
+                duplicatenode(temp1, Q.node);
+                temp1 ->next = L.first;
+                L.first ->prev = temp1;
+                Q.DL = false;
+                Q.IL = true;
                 push(redoStack, Q);
-                delete temp;
             } else {
-                temp->prev->next = temp ->next;
-                temp->next->prev = temp ->prev;
-                temp ->next = nullptr;
-                temp ->prev = nullptr;
-                Q.DL = true;
-                Q.IL = false;
+                while (temp1 != nullptr && temp1 ->info != Q.beforenode ->info){
+                    temp1 = temp1 ->next;
+                }
+                address temp2 = nullptr;
+                duplicatenode(temp2, Q.node);
+                temp1->next->prev = temp2;
+                temp2->next = temp1 ->next;
+                temp1 ->next = temp2;
+                temp2 ->prev = temp1;
+                Q.DL = false;
+                Q.IL = true;
                 push(redoStack, Q);
-                delete temp;
             }
         }
     } else {
@@ -302,5 +307,97 @@ void undo(List &L, Stack &undoStack, Stack &redoStack){
 }
 
 void redo(List &L, Stack &undoStack, Stack &redoStack){
-    
+    infotypeStck Q;
+    address temp1 = L.first;
+    if (!isEmpty(redoStack)){
+        pop(redoStack, Q);
+        if (Q.IL){
+            while(temp1 != nullptr && temp1->info != Q.node->info){
+                temp1 = temp1 ->next;
+            }
+            if (temp1 ->next == nullptr && temp1 ->prev == nullptr){
+                L.first = nullptr;
+                L.last = nullptr;
+                Q.DL = true;
+                Q.IL = false;
+                push(undoStack, Q);
+                delete temp1;
+            } else if(temp1 ->next == nullptr) {
+                L.last = temp1 ->prev;
+                L.last ->next = nullptr;
+                Q.DL = true;
+                Q.IL = false;
+                push(undoStack, Q);
+                delete temp1;
+            } else if(temp1 ->prev == nullptr){
+                L.first = temp1 ->next;
+                L.first ->prev = nullptr;
+                Q.DL = true;
+                Q.IL = false;
+                push(undoStack, Q);
+                delete temp1;
+            } else {
+                temp1->prev->next = temp1 ->next;
+                temp1->next->prev = temp1 ->prev;
+                temp1 ->next = nullptr;
+                temp1 ->prev = nullptr;
+                Q.DL = true;
+                Q.IL = false;
+                push(undoStack, Q);
+                delete temp1;
+            }
+        } else if (Q.DL){
+            if (Q.beforenode == nullptr && Q.afternode == nullptr){
+                duplicatenode(temp1, Q.node);
+                L.first = temp1;
+                L.last = temp1;
+                Q.DL = false;
+                Q.IL = true;
+                push(undoStack, Q);
+            } else if(Q.afternode == nullptr) {
+                duplicatenode(temp1, Q.node);
+                temp1 ->prev = L.last;
+                L.last ->next = temp1;
+                L.last = temp1;
+                Q.DL = false;
+                Q.IL = true;
+                push(undoStack, Q);
+            } else if(Q.beforenode == nullptr){
+                duplicatenode(temp1, Q.node);
+                temp1 ->next = L.first;
+                L.first ->prev = temp1;
+                Q.DL = false;
+                Q.IL = true;
+                push(undoStack, Q);
+            } else {
+                while (temp1 != nullptr && temp1 ->info != Q.beforenode ->info){
+                    temp1 = temp1 ->next;
+                }
+                address temp2 = nullptr;
+                duplicatenode(temp2, Q.node);
+                temp1->next->prev = temp2;
+                temp2->next = temp1 ->next;
+                temp1 ->next = temp2;
+                temp2 ->prev = temp1;
+                Q.DL = false;
+                Q.IL = true;
+                push(undoStack, Q);
+            }
+        }
+    } else {
+        cout << "Terdeteksi belum melakukan Undo"<< endl;
+    }
+}
+
+void duplicatenode(address &P, address S){
+    P ->info = S->info;
+    P ->next = S->next;
+    P ->prev = S->prev;
+} 
+
+void clearRedo(Stack &P){
+    infotypeStck Q;
+    while (!isEmpty(P)){
+        pop(P, Q);
+    }
 }
