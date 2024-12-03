@@ -6,6 +6,7 @@ using namespace std;
 void createList(List &L) {
     L.first = nullptr;
     L.last = nullptr;
+    halooo;
 }
 
 address createElementList(infotype data) {
