@@ -46,7 +46,7 @@ void insertText(List &L, int line, int position, infotype &data) {
     } else {
         address prev = nullptr;
 
-        while (current != nullptr && currentLine < line) {
+        while (current != nullptr && currentLine < line) { // nyari Line yang ingin di insert
             if (current->info == "\n") {
                 currentLine++;
             }
@@ -54,7 +54,7 @@ void insertText(List &L, int line, int position, infotype &data) {
             current = current->next;
         }
         
-        while (currentLine < line) {
+        while (currentLine < line) { //Nambah Line hingga Line ke N, jika line sebelumnya lebih sedikit
             address newLine = createElementList("\n");
             if (L.last != nullptr) {
                 L.last->next = newLine;
