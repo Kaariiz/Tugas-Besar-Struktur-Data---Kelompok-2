@@ -19,7 +19,7 @@ address createElementList(infotype data) {
     return P;
 }
 
-int countElementList(List L) {
+/*int countElementList(List L) {
     address temp;
     temp = L.first;
     int Count;
@@ -31,7 +31,7 @@ int countElementList(List L) {
     }
 
     return Count;
-}
+}*/
 
 void deleteLine(List &L, int position, address P, Stack &Undo) {
     infotypeStck Q;
@@ -51,7 +51,7 @@ void deleteLine(List &L, int position, address P, Stack &Undo) {
                 Q.node = P;
                 Q.beforenode = P->prev;
                 Q.afternode = P->next;
-                L.first = nullptr;  //sepertinya bisa di pangkas
+                L.first = nullptr; 
                 L.last = nullptr;
                 Q.DL = true;
                 Q.IL = false;
@@ -73,7 +73,7 @@ void deleteLine(List &L, int position, address P, Stack &Undo) {
                 Q.node = P;
                 Q.beforenode = P->prev;
                 Q.afternode = P->next;
-                L.first = nullptr; // sepertinya bisa dipangkas
+                L.first = nullptr;
                 L.last = nullptr;
                 Q.DL = true;
                 Q.IL = false;
@@ -137,30 +137,32 @@ void displayText(List &L) {
     cout << endl;
 }
 
-void copyPaste(List &L, int fromLine, int toLine) {
-    // validasi posisi baris yang diminta
-    if (fromLine < 1 || fromLine > countElementList(L) || toLine < 1 || toLine > countElementList(L) + 1) {
-        cout << "Nomor baris tidak valid!" << endl;
-        return;
-    } 
+// void copyPaste(List &L, int fromLine, int toLine) {
+//     // validasi posisi baris yang diminta
+//     if (fromLine < 1 || fromLine > countElementList(L) || toLine < 1 || toLine > countElementList(L) + 1) {
+//         cout << "Nomor baris tidak valid!" << endl;
+//         return;
+//     } 
 
-    // navigasi ke baris yang akan disalin
-    address temp = L.first;
-    for (int i = 1; i < fromLine; i++) {
-        temp = temp->next;
-    }
+//     // navigasi ke baris yang akan disalin
+//     address temp = L.first;
+//     for (int i = 1; i < fromLine; i++) {
+//         temp = temp->next;
+//     }
 
-    // salin isi dari fromLine ke toLine
-    if (temp != nullptr) {
-        insertLine(L, toLine, temp->info);
-    }
-}
+//     // salin isi dari fromLine ke toLine
+//     if (temp != nullptr) {
+//         insertLine(L, toLine, temp->info);
+//     }
+// }
 
 
 // BATAS IMPLEMENTASI BY RIZKA ANANDA PRATAMA
 
-void insertLine(List &L, int position, address P, Stack &Undo, Stack &Redo) {
+void insertLine(List &L, int position, int CL, int Line, infotype data, Stack &Undo, Stack &Redo) {
     infotypeStck Q;
+    address P = createElementList(data);
+    if 
     if (position <= 0 || position > countElementList(L) + 1) {
         cout << "Invalid position!\n";
     } else if (L.first == nullptr) {
