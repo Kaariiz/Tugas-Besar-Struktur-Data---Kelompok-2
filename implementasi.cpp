@@ -9,395 +9,428 @@ void createList(List &L) {
 }
 
 address createElementList(infotype data) {
-    address P;
-
-    P = new ElementList;
+    address P = new ElementList;
     P->info = data;
     P->next = nullptr;
     P->prev = nullptr;
-
     return P;
 }
 
-int countElementList(List L) {
-    address temp;
-    temp = L.first;
-    int Count;
-    Count = 0;
+void insertText(List &L, int line, int position, infotype &data, OperationStack &undoredo) {
+    cout << "Insert: Line=" << line << ", Position=" << position << ", Data=" << data << endl;
 
-    while (temp != nullptr) {
-        Count += 1;
+    address current = L.first;
+    int currentLine = 1;
+    int po = position;
+
+    while (current != nullptr && currentLine < line) {
+        if (current->info == "\n") currentLine++;
+        current = current->next;
+    }
+
+    while (currentLine < line) {
+        address newLine = createElementList("\n");
+        if (L.last != nullptr) {
+            L.last->next = newLine;
+            newLine->prev = L.last;
+        } else {
+            L.first = newLine;
+        }
+        L.last = newLine;
+        currentLine++;
+    }
+
+    address newElement = createElementList(data);
+    if (current == nullptr) {
+        if (L.last == nullptr) {
+            L.first = newElement;
+            L.last = newElement;
+        } else {
+            L.last->next = newElement;
+            newElement->prev = L.last;
+            L.last = newElement;
+        }
+    } else {
+        while (current != nullptr && position > 1 && current->info != "\n") {
+            position--;
+            current = current->next;
+        }
+        if (current == nullptr || current->info == "\n") {
+            if (L.last != nullptr) {
+                L.last->next = newElement;
+                newElement->prev = L.last;
+                L.last = newElement;
+            }
+        } else {
+            newElement->next = current;
+            newElement->prev = current->prev;
+            if (current->prev != nullptr) current->prev->next = newElement;
+            current->prev = newElement;
+            if (L.first == current) L.first = newElement;
+        }
+    }
+    cout << "Insert berhasil" << endl;
+    Operation op;
+    op.action = "insert";
+    op.line = line;
+    op.position = po;
+    op.data = data;
+    push(undoredo, op);
+}
+
+
+void deleteWord(List &L, int line, int position, OperationStack &undoredo) {
+    address current = L.first;
+    int currentLine = 1;
+    infotype delword;
+    // Cari baris yang sesuai
+    while (current != nullptr && currentLine < line) {
+        if (current->info == "\n") currentLine++;
+        current = current->next;
+    }
+    int po = position;
+    // Cari posisi dalam baris
+    while (current != nullptr && position > 1 && current->info != "\n") {
+        position--;
+        current = current->next;
+    }
+
+    // Hapus node jika ditemukan
+    if (current != nullptr && current->info != "\n") {
+        delword = current->info; // Simpan kata yang dihapus
+        if (current->prev != nullptr) current->prev->next = current->next;
+        if (current->next != nullptr) current->next->prev = current->prev;
+        if (current == L.first) L.first = current->next;
+        if (current == L.last) L.last = current->prev;
+        delete current;
+
+        cout << "Kata berhasil dihapus" << endl;
+        Operation op;
+        op.action = "delete";
+        op.line = line;
+        op.position = po;
+        op.data = delword;
+        push(undoredo, op);
+    } else {
+        delword = ""; // Tidak ada kata yang dihapus
+        cout << "Posisi tidak valid atau kata tidak ditemukan!" << endl;
+        return;
+    }
+
+    // Cek apakah baris kosong setelah penghapusan
+    current = L.first;
+    currentLine = 1;
+
+    while (current != nullptr && currentLine < line) {
+    if (current->info == "\n") currentLine++;
+    current = current->next;
+}
+
+// Periksa apakah baris hanya berisi `\n`
+    bool isEmptyLine = true;
+    address temp = current;
+    while (temp != nullptr && temp->info != "\n") {
+        if (!temp->info.empty()) { // Cek apakah info bukan string kosong
+            isEmptyLine = false;
+            break;
+        }
         temp = temp->next;
     }
 
-    return Count;
+    // Jika baris kosong dan `current` menunjuk ke `\n`
+    if (isEmptyLine && current != nullptr && current->info == "\n") {
+        // Periksa apakah baris tersebut adalah baris terakhir
+        if (current == L.last) {
+            // Jika baris hanya terdiri dari \n, hapus baris tersebut
+            if (current->prev != nullptr) {
+                current->prev->next = nullptr;
+                L.last = current->prev;
+                delete current;
+            } else {
+                // Jika hanya ada satu baris (L.first == L.last)
+                L.first = nullptr;
+                L.last = nullptr;
+                delete current;
+            }
+            cout << "Baris ke-" << line << " telah dihapus karena kosong." << endl;
+        } else {
+            // Jika bukan baris terakhir, lakukan penghapusan seperti biasa
+            if (current->prev != nullptr) current->prev->next = current->next;
+            if (current->next != nullptr) current->next->prev = current->prev;
+            if (current == L.first) L.first = current->next;
+            delete current;
+
+            // Setelah penghapusan, cek apakah baris berikutnya kosong
+            address tempNode = current->next;
+            while (tempNode != nullptr) {
+                if (tempNode->info == "\n") {
+                    break; // Jika menemukan baris baru, stop.
+                }
+                currentLine++;
+                tempNode = tempNode->next;
+            }
+            cout << "Baris ke-" << line << " telah dihapus karena kosong." << endl;
+        }
+    }
 }
 
-void deleteLine(List &L, int position, address P, Stack &Undo) {
-    infotypeStck Q;
-    int totalElement;
-    totalElement = countElementList(L);
+void copyPaste(List &L, int lineSrc, int posSrc, int lineDest, int posDest, OperationStack &undoredo) {
+    address currentSrc = L.first;
+    address currentDest = L.first;
+    int currentLine = 1;
+    infotype copiedData = "";
 
-    if (totalElement == 0) {
-        cout << "Tidak ada text yang tersimpan, tidak dapat menggunakan fitur Delete!" << endl;
+    // Cari baris sumber
+    while (currentSrc != nullptr && currentLine < lineSrc) {
+        if (currentSrc->info == "\n") currentLine++;
+        currentSrc = currentSrc->next;
+    }
 
-    } else if (position > totalElement) {
-        cout << "Posisi melebihi jumlah baris!" << endl;   //kalo posisi berlebih, looping input di main aja
+    // Cari posisi pada baris sumber
+    int poS = posSrc;
+    while (currentSrc != nullptr && posSrc > 1 && currentSrc->info != "\n") {
+        posSrc--;
+        currentSrc = currentSrc->next;
+    }
 
-    } else {
-        if (position == 1) {
-            if (L.first->next == nullptr) {
-                P = L.first;
-                Q.node = P;
-                Q.beforenode = P->prev;
-                Q.afternode = P->next;
-                L.first = nullptr;  //sepertinya bisa di pangkas
-                L.last = nullptr;
-                Q.DL = true;
-                Q.IL = false;
-            } else {
-                P = L.first;
-                L.first = P->next;
-                Q.node = P;
-                Q.beforenode = P->prev;
-                Q.afternode = P->next;
-                P->next = nullptr;
-                L.first->prev = nullptr;
-                Q.DL = true;
-                Q.IL = false;
-            }
+    // Salin teks dari posisi yang ditemukan
+    if (currentSrc != nullptr && currentSrc->info != "\n") {
+        copiedData = currentSrc->info;  // Menyimpan teks yang akan disalin
+    }
 
-        } else if (position == totalElement) {
-            if (L.first->next == nullptr) {
-                P = L.first;
-                Q.node = P;
-                Q.beforenode = P->prev;
-                Q.afternode = P->next;
-                L.first = nullptr; // sepertinya bisa dipangkas
-                L.last = nullptr;
-                Q.DL = true;
-                Q.IL = false;
-            } else {
-                P = L.last;
-                L.last = L.last->prev;
-                Q.node = P;
-                Q.beforenode = P->prev;
-                Q.afternode = P->next;
-                P->prev = nullptr;
-                L.last->next = nullptr;
-                Q.DL = true;
-                Q.IL = false;
-            }
+    // Cari baris tujuan
+    currentLine = 1;
+    while (currentDest != nullptr && currentLine < lineDest) {
+        if (currentDest->info == "\n") currentLine++;
+        currentDest = currentDest->next;
+    }
 
+    // Cari posisi pada baris tujuan
+    int poD = posDest;
+    while (currentDest != nullptr && posDest > 1 && currentDest->info != "\n") {
+        posDest--;
+        currentDest = currentDest->next;
+    }
+
+    // Sisipkan salinan teks pada baris dan posisi tujuan
+    address newElement = createElementList(copiedData);
+    if (currentDest == nullptr || currentDest->info == "\n") {
+        if (L.last != nullptr) {
+            L.last->next = newElement;
+            newElement->prev = L.last;
+            L.last = newElement;
         } else {
-            address tempL;
-            int tempC;
-            tempL = L.first;
-            tempC = 0;
+            L.first = newElement;
+            L.last = newElement;
+        }
+    } else {
+        newElement->next = currentDest;
+        newElement->prev = currentDest->prev;
+        if (currentDest->prev != nullptr) currentDest->prev->next = newElement;
+        currentDest->prev = newElement;
+        if (L.first == currentDest) L.first = newElement;
+    }
 
-            while (tempC != position) {
-                tempC += 1;
-                tempL = tempL->next;
-            }
+    cout << "Copy-Paste berhasil" << endl;
 
-            P = tempL;
+    // Simpan operasi untuk undo
+    Operation op;
+    op.action = "copyPaste";
+    op.line = lineDest;
+    op.position = posDest;
+    op.data = copiedData;
+    op.srcLine = lineSrc;
+    op.srcPos = poS;
+    op.destLine = lineDest;
+    op.destPos = poD;
+    push(undoredo, op);
+}
 
-            P->prev->next = P->next;
-            P->next->prev = P->prev;
-            Q.node = P;
-            Q.beforenode = P->prev;
-            Q.afternode = P->next;
-            P->next = nullptr;
-            P->prev = nullptr;
-            Q.DL = true;
-            Q.IL = false;
+void replaceWord(List &L, infotype oldWord, infotype newWord, int line, int position, OperationStack &undoredo) {
+    address current = L.first;
+    int currentLine = 1;
+    infotype replacedData = "";
+
+    // Cari baris yang sesuai
+    while (current != nullptr && currentLine < line) {
+        if (current->info == "\n") currentLine++;
+        current = current->next;
+    }
+
+    // Cari posisi dalam baris
+    int po = position;
+    while (current != nullptr && position > 1 && current->info != "\n") {
+        position--;
+        current = current->next;
+    }
+
+    // Ganti kata jika ditemukan
+    if (current != nullptr && current->info == oldWord) {
+        replacedData = current->info; // Simpan data yang diganti
+        current->info = newWord;      // Ganti dengan kata baru
+
+        cout << "Kata berhasil diganti" << endl;
+
+        // Simpan operasi untuk undo
+        Operation op;
+        op.action = "replace";
+        op.line = line;
+        op.position = po;
+        op.data = newWord;
+        op.oldData = replacedData;
+        push(undoredo, op);
+    } else {
+        cout << "Kata tidak ditemukan!" << endl;
+    }
+}
+
+void findWord(List L, infotype word) {
+    address current = L.first;
+    int currentLine = 1;
+    int position = 1;
+    bool found = false;
+
+    while (current != nullptr) {
+        if (current->info == word) {
+            cout << "Kata \"" << word << "\" ditemukan di Baris " << currentLine << ", Posisi " << position << endl;
+            found = true;
         }
 
-        cout << "Text dengan posisi tersebut telah berhasil dihapus!" << endl;
-        cout << "Text yang dihapus adalah: " << P->info << endl;
+        position++;
+        if (current->info == "\n") {
+            currentLine++;
+            position = 1;
+        }
+
+        current = current->next;
     }
-    push(Undo,Q);
-    delete P;
+
+    if (!found) {
+        cout << "Kata \"" << word << "\" tidak ditemukan!" << endl;
+    }
 }
 
 void displayText(List &L) {
-    address temp;
-    temp = L.first;
-
-    if (temp == nullptr) {
-        cout << "Tidak ada text yang tersimpan!" << endl;
-    } else {
-        cout << "Text yang tersimpan adalah: " << endl;
-        while (temp != nullptr) {
-            cout << temp->info << ", ";
-            temp = temp->next;
+    if (L.first != nullptr){
+        address current = L.first;
+        while (current != nullptr) {
+            if (current->info == "\n") {
+                cout << endl;
+            } else {
+                cout << current->info << " ";
+            }
+            current = current->next;
         }
-    }
-
-    cout << endl;
-}
-
-void copyPaste(List &L, int fromLine, int toLine) {
-    // validasi posisi baris yang diminta
-    if (fromLine < 1 || fromLine > countElementList(L) || toLine < 1 || toLine > countElementList(L) + 1) {
-        cout << "Nomor baris tidak valid!" << endl;
-        return;
-    } 
-
-    // navigasi ke baris yang akan disalin
-    address temp = L.first;
-    for (int i = 1; i < fromLine; i++) {
-        temp = temp->next;
-    }
-
-    // salin isi dari fromLine ke toLine
-    if (temp != nullptr) {
-        insertLine(L, toLine, temp->info);
-    }
-}
-
-
-// BATAS IMPLEMENTASI BY RIZKA ANANDA PRATAMA
-
-void insertLine(List &L, int position, address P, Stack &Undo, Stack &Redo) {
-    infotypeStck Q;
-    if (position <= 0 || position > countElementList(L) + 1) {
-        cout << "Invalid position!\n";
-    } else if (L.first == nullptr) {
-        L.first = P;
-        L.last = P;
-    } else if (position == 1) {
-        P->next = L.first;
-        L.first->prev = P;
-        L.first = P;
-    } else if (position == countElementList(L) + 1) {
-        P->prev = L.last;
-        L.last->next = P;
-        L.last = P;
+        cout << endl;
     } else {
-        address Q = L.first;
-        for (int i = 1; i <= position - 1; i++) {
-            Q = Q->next;
-        }
-        P->next = Q->next;
-        P->prev = Q;
-        Q->next->prev = P;
-        Q->next = P;
+        cout << "Tidak Terdapat Text pada list"<< endl;
     }
-    Q.node = P;
-    Q.beforenode = P->prev;
-    Q.afternode = P->next;
-    Q.DL = false;
-    Q.IL = true;
-    push(Undo,Q);
-    clearRedo(Redo);
 }
 
-void createStack(Stack &S){
-    S.top = 0;
+void createStack(OperationStack &S){
+    S.top = -1;
 }
 
-bool isEmpty(Stack S){
-    return S.top == 0;
+bool isEmpty(OperationStack S){
+    return S.top == -1;
 }
 
-bool isFull(Stack S){
+bool isFull(OperationStack S){
     return S.top == MAX_STACK;
 }
 
-void push(Stack &S, infotypeStck P){
+void push(OperationStack &S, Operation P){
     if (!isFull(S)){
         S.top++;
-        S.info[S.top] = P;
+        S.operations[S.top] = P;
     } else {
         cout << "Stack Penuh";
     }
 }
 
-void pop(Stack &S, infotypeStck &operation){
+void pop(OperationStack &S, Operation &operation){
     if (!isEmpty(S)){
-        S.info[S.top] = operation;
+        operation = S.operations[S.top];
         S.top--;
     } else {
         cout << "Stack Kosong";
     }
 }
 
-void undo(List &L, Stack &undoStack, Stack &redoStack){
-    infotypeStck Q;
-    address temp1 = L.first; 
-    if (!isEmpty(undoStack)){
-        pop(undoStack, Q);
-        if (Q.IL){
-            while(temp1 != nullptr && temp1->info != Q.node->info){
-                temp1 = temp1 ->next;
-            }
-            if (temp1 ->next == nullptr && temp1 ->prev == nullptr){
-                L.first = nullptr;
-                L.last = nullptr;
-                Q.DL = true;
-                Q.IL = false;
-                push(redoStack, Q);
-                delete temp1;
-            } else if(temp1 ->next == nullptr) {
-                L.last = temp1 ->prev;
-                L.last ->next = nullptr;
-                Q.DL = true;
-                Q.IL = false;
-                push(redoStack, Q);
-                delete temp1;
-            } else if(temp1 ->prev == nullptr){
-                L.first = temp1 ->next;
-                L.first ->prev = nullptr;
-                Q.DL = true;
-                Q.IL = false;
-                push(redoStack, Q);
-                delete temp1;
-            } else {
-                temp1->prev->next = temp1 ->next;
-                temp1->next->prev = temp1 ->prev;
-                temp1 ->next = nullptr;
-                temp1 ->prev = nullptr;
-                Q.DL = true;
-                Q.IL = false;
-                push(redoStack, Q);
-                delete temp1;
-            }
-        } else if (Q.DL){
-            if (Q.beforenode == nullptr && Q.afternode == nullptr){
-                duplicatenode(temp1, Q.node);
-                L.first = temp1;
-                L.last = temp1;
-                Q.DL = false;
-                Q.IL = true;
-                push(redoStack, Q);
-            } else if(Q.afternode == nullptr) {
-                duplicatenode(temp1, Q.node);
-                temp1 ->prev = L.last;
-                L.last ->next = temp1;
-                L.last = temp1;
-                Q.DL = false;
-                Q.IL = true;
-                push(redoStack, Q);
-            } else if(Q.beforenode == nullptr){
-                duplicatenode(temp1, Q.node);
-                temp1 ->next = L.first;
-                L.first ->prev = temp1;
-                Q.DL = false;
-                Q.IL = true;
-                push(redoStack, Q);
-            } else {
-                while (temp1 != nullptr && temp1 ->info != Q.beforenode ->info){
-                    temp1 = temp1 ->next;
-                }
-                address temp2 = nullptr;
-                duplicatenode(temp2, Q.node);
-                temp1->next->prev = temp2;
-                temp2->next = temp1 ->next;
-                temp1 ->next = temp2;
-                temp2 ->prev = temp1;
-                Q.DL = false;
-                Q.IL = true;
-                push(redoStack, Q);
-            }
-        }
-    } else {
-        cout << "Belum terdapat perubahan"<< endl;
+void undo(List &L, OperationStack &undoStack, OperationStack &redoStack) {
+    if (isEmpty(undoStack)) {
+        cout << "Tidak ada operasi untuk di-undo!" << endl;
+        return;
+    }
+
+    Operation lastOp;
+    pop(undoStack, lastOp);
+    cout << "Melakukan Undo operasi: Action = " << lastOp.action
+         << ", Baris = " << lastOp.line
+         << ", Posisi = " << lastOp.position
+         << ", Data = " << lastOp.data << endl;
+
+    if (lastOp.action == "insert") {
+        deleteWord(L, lastOp.line, lastOp.position, redoStack);
+    } else if (lastOp.action == "delete") {
+        insertText(L, lastOp.line, lastOp.position, lastOp.data, redoStack);
+    } else if (lastOp.action == "copyPaste") {
+        // Undo CopyPaste berarti menghapus data yang disalin
+        deleteWord(L, lastOp.destLine, lastOp.destPos, redoStack);  // Menghapus salinan yang dipaste
+
+        // Jika Anda ingin mengembalikan data asli di tempat sumber, Anda dapat menyisipkannya kembali
+        //insertText(L, lastOp.srcLine, lastOp.srcPos, lastOp.data, redoStack); // Menyisipkan kembali data yang disalin di tempat asalnya
+    } else if (lastOp.action == "replace") {
+        // Undo replace berarti mengembalikan kata yang diganti
+        replaceWord(L, lastOp.data, lastOp.oldData, lastOp.line, lastOp.position, redoStack);
+    }
+
+    cout << "Undo Berhasil Dilakukan" << endl;
+}
+
+
+
+void redo(List &L, OperationStack &undoStack, OperationStack &redoStack) {
+    if (isEmpty(redoStack)) {
+        cout << "Tidak ada operasi untuk di-redo!" << endl;
+        return;
+    }
+
+    Operation lastOp;
+    pop(redoStack, lastOp);
+
+    cout << "Melakukan redo operasi: Action = " << lastOp.action
+         << ", Baris = " << lastOp.line
+         << ", Posisi = " << lastOp.position
+         << ", Data = " << lastOp.data << endl;
+
+    if (lastOp.action == "delete") {
+        // Masukkan teks ke posisi yang sama seperti sebelumnya
+        insertText(L, lastOp.line, lastOp.position, lastOp.data, undoStack);
+    } else if (lastOp.action == "insert") {
+        // Hapus teks dari posisi yang sama seperti sebelumnya
+        deleteWord(L, lastOp.line, lastOp.position, undoStack);
+    } else if (lastOp.action == "copyPaste") {
+        // Redo CopyPaste berarti menyalin data ke posisi tujuan
+        insertText(L, lastOp.destLine, lastOp.destPos, lastOp.data, undoStack); // Menambahkan salinan yang dipaste
+
+        // Jika perlu, kita juga bisa memulihkan data di tempat sumber (jika itu diubah selama proses copy-paste)
+        // Contoh: Jika data yang dipaste berasal dari tempat yang berubah, kita bisa menambahkan data sumber kembali
+        //insertText(L, lastOp.srcLine, lastOp.srcPos, lastOp.data, undoStack); // Menambahkan data sumber lagi
+    } else if (lastOp.action == "replace") {
+        // Redo replace berarti mengganti kata lagi
+        replaceWord(L, lastOp.oldData, lastOp.data, lastOp.line, lastOp.position, undoStack);
+    }
+
+    cout << "Redo berhasil dilakukan." << endl;
+}
+
+
+void clearRedo(OperationStack &redow){
+    Operation Q;
+    while (!isEmpty(redow)){
+        pop(redow,Q);
     }
 }
 
-void redo(List &L, Stack &undoStack, Stack &redoStack){
-    infotypeStck Q;
-    address temp1 = L.first;
-    if (!isEmpty(redoStack)){
-        pop(redoStack, Q);
-        if (Q.IL){
-            while(temp1 != nullptr && temp1->info != Q.node->info){
-                temp1 = temp1 ->next;
-            }
-            if (temp1 ->next == nullptr && temp1 ->prev == nullptr){
-                L.first = nullptr;
-                L.last = nullptr;
-                Q.DL = true;
-                Q.IL = false;
-                push(undoStack, Q);
-                delete temp1;
-            } else if(temp1 ->next == nullptr) {
-                L.last = temp1 ->prev;
-                L.last ->next = nullptr;
-                Q.DL = true;
-                Q.IL = false;
-                push(undoStack, Q);
-                delete temp1;
-            } else if(temp1 ->prev == nullptr){
-                L.first = temp1 ->next;
-                L.first ->prev = nullptr;
-                Q.DL = true;
-                Q.IL = false;
-                push(undoStack, Q);
-                delete temp1;
-            } else {
-                temp1->prev->next = temp1 ->next;
-                temp1->next->prev = temp1 ->prev;
-                temp1 ->next = nullptr;
-                temp1 ->prev = nullptr;
-                Q.DL = true;
-                Q.IL = false;
-                push(undoStack, Q);
-                delete temp1;
-            }
-        } else if (Q.DL){
-            if (Q.beforenode == nullptr && Q.afternode == nullptr){
-                duplicatenode(temp1, Q.node);
-                L.first = temp1;
-                L.last = temp1;
-                Q.DL = false;
-                Q.IL = true;
-                push(undoStack, Q);
-            } else if(Q.afternode == nullptr) {
-                duplicatenode(temp1, Q.node);
-                temp1 ->prev = L.last;
-                L.last ->next = temp1;
-                L.last = temp1;
-                Q.DL = false;
-                Q.IL = true;
-                push(undoStack, Q);
-            } else if(Q.beforenode == nullptr){
-                duplicatenode(temp1, Q.node);
-                temp1 ->next = L.first;
-                L.first ->prev = temp1;
-                Q.DL = false;
-                Q.IL = true;
-                push(undoStack, Q);
-            } else {
-                while (temp1 != nullptr && temp1 ->info != Q.beforenode ->info){
-                    temp1 = temp1 ->next;
-                }
-                address temp2 = nullptr;
-                duplicatenode(temp2, Q.node);
-                temp1->next->prev = temp2;
-                temp2->next = temp1 ->next;
-                temp1 ->next = temp2;
-                temp2 ->prev = temp1;
-                Q.DL = false;
-                Q.IL = true;
-                push(undoStack, Q);
-            }
-        }
-    } else {
-        cout << "Terdeteksi belum melakukan Undo"<< endl;
-    }
-}
 
-void duplicatenode(address &P, address S){
-    P ->info = S->info;
-    P ->next = S->next;
-    P ->prev = S->prev;
-} 
-
-void clearRedo(Stack &P){
-    infotypeStck Q;
-    while (!isEmpty(P)){
-        pop(P, Q);
-    }
-}

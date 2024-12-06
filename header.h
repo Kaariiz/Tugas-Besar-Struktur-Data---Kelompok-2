@@ -10,12 +10,6 @@ const int MAX_STACK = 100;
 
 typedef string infotype;
 typedef struct ElementList *address;
-struct infotypeStck{
-    address node;
-    address beforenode;
-    address afternode;
-    bool IL, DL;
-};
 
 struct ElementList {
     infotype info;
@@ -28,30 +22,44 @@ struct List {
     address last;
 };
 
-struct Stack {
-    infotypeStck info[MAX_STACK];
+struct Operation {
+    string action;  // "insert", "delete", "copyPaste", "replace"
+    int line;
+    int position;
+    infotype data;    // Data yang terlibat dalam operasi
+    infotype oldData; // Data yang lama (untuk undo pada replace atau copyPaste)
+    int srcLine;      // Untuk operasi copyPaste: baris sumber
+    int srcPos;       // Untuk operasi copyPaste: posisi sumber
+    int destLine;     // Untuk operasi copyPaste: baris tujuan
+    int destPos;      // Untuk operasi copyPaste: posisi tujuan
+};
+
+struct OperationStack {
+    Operation operations[MAX_STACK];
     int top;
 };
 
-//sub-program yang menggunakan Doubly Linked List
+// Subprogram untuk Doubly Linked List
 void createList(List &L);
 address createElementList(infotype data);
-int countElementList(List L);    //digunakan sebagai pengganti index, agar mempermudah implementasi sub-program yang menggunakan parameter position
-void insertLine(List &L, int position, address P);
-void deleteLine(List &L, int position, address P);
+void insertText(List &L, int line, int position, infotype &data, OperationStack &undoredo);
+void deleteWord(List &L, int line, int position, OperationStack &undoredo);
 void displayText(List &L);
-void navigasiCepat(List &L, int lineNumber);
-void copyPaste(List &L, int fromLine, int toLine);
-bool findWord(List L, infotype word);
-void replaceWord(List &L, infotype oldWord, infotype newWord);
+void findWord(List L, infotype word);
+void replaceWord(List &L, infotype oldWord, infotype newWord, int line, int position, OperationStack &undoredo);
+void copyPaste(List &L, int lineSrc, int posSrc, int lineDest, int posDest, OperationStack &undoredo);
 
-//sub-program yang menggunakan Stack
-void createStack(Stack &S);
-bool isEmpty(Stack S);
-bool isFull(Stack S);
-void push(Stack &S, infotypeStck P);
-void pop(Stack &S, infotypeStck &operation);
-void undo(List &L, Stack &undoStack, Stack &redoStack);
-void redo(List &L, Stack &undoStack, Stack &redoStack);
+
+// Subprogram untuk Stack
+void createStack(OperationStack &S);
+bool isEmpty(OperationStack S);
+bool isFull(OperationStack S);
+void push(OperationStack &S, Operation op);
+void pop(OperationStack &S, Operation &op);
+void clearRedo(OperationStack &redow);
+
+// Subprogram untuk Undo/Redo
+void undo(List &L, OperationStack &undoStack, OperationStack &redoStack);
+void redo(List &L, OperationStack &undoStack, OperationStack &redoStack);
 
 #endif // HEADER_H_INCLUDED
