@@ -7,44 +7,75 @@
 using namespace std;
 
 const int MAX_STACK = 100;
-
 typedef string infotype;
-typedef struct ElementList *address;
 
-struct ElementList {
+// Node kata (Word)
+struct WordNode {
     infotype info;
-    address prev;
-    address next;
+    WordNode *prev;
+    WordNode *next;
 };
 
-struct List {
-    address first;
-    address last;
+// Node baris (Line)
+struct LineNode {
+    LineNode *prev;
+    LineNode *next;
+    WordNode *firstWord;
+    WordNode *lastWord;
 };
 
-struct Stack {
-    infotype info[MAX_STACK];
+// Dokumen yang berisi banyak baris
+struct Document {
+    LineNode *firstLine;
+    LineNode *lastLine;
+};
+
+struct Operation {
+    string action;  // "insert", "delete", "copyPaste", "replace"
+    int line;
+    int position;
+    infotype data;    // Data yang terlibat dalam operasi
+    infotype oldData; // Data lama (untuk undo replace atau copyPaste)
+    int srcLine;      // Untuk copyPaste: baris sumber
+    int srcPos;       // Untuk copyPaste: posisi sumber
+    int destLine;     // Untuk copyPaste: baris tujuan
+    int destPos;      // Untuk copyPaste: posisi tujuan
+};
+
+struct OperationStack {
+    Operation operations[MAX_STACK];
     int top;
 };
 
-//sub-program yang menggunakan Doubly Linked List
-void createList(List &L);
-address createElementList(infotype data);
-void insertText(List &L, int line, int position, infotype &data); //upadated
-void deleteLine(List &L, int lineNumber); //updated
-void displayText(List &L); // updated
-void navigasiCepat(List &L, int lineNumber);
-void copyPasteWord(List &L, int sourceLine, int sourcePosition, int targetLine, int targetPosition); //updated
-void findWord(List L, infotype word); // updated
-void replaceWord(List &L, infotype oldWord, infotype newWord); //updated
+// Fungsi dasar MLL
+void createDocument(Document &D);
+LineNode* createLine();
+WordNode* createWord(infotype data);
 
-//sub-program yang menggunakan Stack
-void createStack(Stack &S);
-bool isEmpty(Stack S);
-bool isFull(Stack S);
-void push(Stack &S, infotype P);
-void pop(Stack &S, infotype &operation);
-void undo(List &L, Stack &undoStack, Stack &redoStack);
-void redo(List &L, Stack &undoStack, Stack &redoStack);
+LineNode* getLine(Document &D, int lineNumber, bool createIfNotExist = false);
+WordNode* getWord(LineNode *L, int position);
+
+void insertText(Document &D, int line, int position, infotype &data, OperationStack &undoStack);
+void deleteWord(Document &D, int line, int position, OperationStack &undoStack);
+void displayText(Document &D);
+void findWord(Document &D, infotype word);
+void replaceWord(Document &D, infotype oldWord, infotype newWord, int line, int position, OperationStack &undoStack);
+void copyPaste(Document &D, int lineSrc, int posSrc, int lineDest, int posDest, OperationStack &undoStack);
+
+// Stack
+void createStack(OperationStack &S);
+bool isEmpty(OperationStack S);
+bool isFull(OperationStack S);
+void push(OperationStack &S, Operation op);
+void pop(OperationStack &S, Operation &op);
+void clearRedo(OperationStack &redoStack);
+
+// Undo/Redo
+void undo(Document &D, OperationStack &undoStack, OperationStack &redoStack);
+void redo(Document &D, OperationStack &undoStack, OperationStack &redoStack);
+
+// Fungsi bantu
+int countWords(LineNode *L);
+int countLines(Document &D);
 
 #endif // HEADER_H_INCLUDED
