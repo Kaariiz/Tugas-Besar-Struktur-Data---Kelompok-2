@@ -66,6 +66,24 @@ LineNode* getLine(Document &D, int lineNumber, bool createIfNotExist) {
     return nullptr;
 }
 
+void deleteLine(Document &D, LineNode *L) {
+    if (L == nullptr) return;
+
+    if (L->prev != nullptr) {
+        L->prev->next = L->next;
+    } else {
+        D.firstLine = L->next; // Jika baris pertama
+    }
+
+    if (L->next != nullptr) {
+        L->next->prev = L->prev;
+    } else {
+        D.lastLine = L->prev; // Jika baris terakhir
+    }
+
+    delete L;
+    cout << "Baris kosong dihapus." << endl;
+}
 
 // Mendapatkan kata ke-n (1-based) dalam sebuah baris
 WordNode* getWord(LineNode *L, int position) {
@@ -175,6 +193,11 @@ void deleteWord(Document &D, int line, int position, OperationStack &undoStack) 
     delete W;
 
     cout << "Kata '" << delword << "' berhasil dihapus dari line " << line << " posisi " << position << endl;
+
+    // Jika baris kosong setelah penghapusan, hapus baris tersebut
+    if (L->firstWord == nullptr) {
+        deleteLine(D, L);
+    }
 
     Operation op;
     op.action = "delete";
@@ -357,6 +380,7 @@ void undo(Document &D, OperationStack &undoStack, OperationStack &redoStack) {
         deleteWord(D, lastOp.line, lastOp.position, redoStack);
     } else if (lastOp.action == "delete") {
         // Undo delete = insert kembali kata yang dihapus
+        LineNode *line = getLine(D, lastOp.line, true); // Rekonstruksi baris jika perlu
         infotype w = lastOp.data;
         insertText(D, lastOp.line, lastOp.position, w, redoStack);
     } else if (lastOp.action == "copyPaste") {
@@ -386,6 +410,7 @@ void redo(Document &D, OperationStack &undoStack, OperationStack &redoStack) {
         deleteWord(D, lastOp.line, lastOp.position, undoStack);
     } else if (lastOp.action == "delete") {
         // Redo insert berarti delete -> insert lagi
+        LineNode *line = getLine(D, lastOp.line, true); // Rekonstruksi baris jika perlu
         infotype w = lastOp.data;
         insertText(D, lastOp.line, lastOp.position, w, undoStack);
     } else if (lastOp.action == "copyPaste") {
