@@ -1,57 +1,66 @@
 #ifndef HEADER_H_INCLUDED
 #define HEADER_H_INCLUDED
 
-#include <string>
-#include <iostream>
-
 using namespace std;
 
-const int MAX_STACK = 100;
+typedef string infoChild;
+typedef int infoParent;
 
-typedef string infotype;
-typedef struct ElementList *address;
-struct infotypeStck{
-    address node;
-    address beforenode;
-    address afternode;
-    bool IL, DL;
+typedef struct ElmParent *adrParent;
+typedef struct ElmChild *adrChild;
+
+struct ElmParent {
+    infoParent info;
+    adrParent next, prev;
+    adrChild child;
 };
 
-struct ElementList {
-    infotype info;
-    address prev;
-    address next;
+struct ElmChild {
+    infoChild info;
+    adrChild next, prev;
 };
 
 struct List {
-    address first;
-    address last;
+    adrParent first, last;
 };
 
-struct Stack {
-    infotypeStck info[MAX_STACK];
-    int top;
+struct Operation {
+    string type;         // "insert", "delete", "replace"
+    int line;           // Line affected
+    int position;       // Position in the line (if applicable)
+    string oldData;     // Data before the operation (for undo)
+    string newData;     // Data after the operation (for redo)
 };
 
-//sub-program yang menggunakan Doubly Linked List
-void createList(List &L);
-address createElementList(infotype data);
-int countElementList(List L);    //digunakan sebagai pengganti index, agar mempermudah implementasi sub-program yang menggunakan parameter position
-void insertLine(List &L, int position, address P);
-void deleteLine(List &L, int position, address P);
-void displayText(List &L);
-void navigasiCepat(List &L, int lineNumber);
-void copyPaste(List &L, int fromLine, int toLine);
-bool findWord(List L, infotype word);
-void replaceWord(List &L, infotype oldWord, infotype newWord);
+struct OperationNode {
+    Operation data;
+    OperationNode* next;
+};
 
-//sub-program yang menggunakan Stack
-void createStack(Stack &S);
-bool isEmpty(Stack S);
-bool isFull(Stack S);
-void push(Stack &S, infotypeStck P);
-void pop(Stack &S, infotypeStck &operation);
-void undo(List &L, Stack &undoStack, Stack &redoStack);
-void redo(List &L, Stack &undoStack, Stack &redoStack);
+struct OperationStack {
+    OperationNode* top;
+};
+
+void createStack(OperationStack &S);
+bool isEmpty(OperationStack S);
+void push(OperationStack &S, Operation op);
+Operation pop(OperationStack &S);
+
+void createListBaris(List &L);
+adrParent createElmBaris(infoParent data);
+void deleteBaris(List &L, int baris, OperationStack &undoStack, bool addToStack);
+void insertBaris(List &L, int baris, OperationStack &undoStack, bool addToStack);
+void insertKata(List &L, int baris, int posisi, string kata, OperationStack &undoStack, bool addToStack);
+void replaceKata(List &L, string kataLama, string kataBaru, OperationStack &undoStack, bool addToStack);
+void findKata(List L, string kata);    // updated
+void showAll(List L);   // updated
+void showPerbaris(List L, int baris); // updated
+void undo(List &L, OperationStack &undoStack, OperationStack &redoStack);
+void redo(List &L, OperationStack &undoStack, OperationStack &redoStack);
+void clearRedo(OperationStack &redoStack);
+
+void clearScreen();
+
+
 
 #endif // HEADER_H_INCLUDED
