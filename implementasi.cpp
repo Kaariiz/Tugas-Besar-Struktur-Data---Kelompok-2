@@ -49,16 +49,65 @@ adrParent createElmBaris(infoParent data) {
     return P;
 }
 
-int countElementList(List L) {
-    address temp;
-    temp = L.first;
-    int Count;
-    Count = 0;
+void insertBaris(List &L, int baris, OperationStack &undoStack, bool addToStack) {
+    adrParent P;
 
-    while (temp != nullptr) {
-        Count += 1;
-        temp = temp->next;
-    }
+    P = new ElmParent;
+
+    P->info = baris;
+    P->next = nullptr;
+    P->prev = nullptr;
+    P->child = nullptr;
+
+    if (baris < 1) {
+        cout << "Inputan baris tidak valid!" << endl;
+    } else {
+        if (L.first == nullptr) { // Jika list masih kosong
+            P->info = 1; // Pastikan baris pertama adalah 1
+            L.first = P;
+            L.last = P;
+
+            if (baris > 1) {
+                cout << "Dokumen masih kosong, sehingga baris pertama ditambahkan secara otomatis.";
+
+            } else {
+                cout << "Baris pertama berhasil ditambahkan!" << endl;
+            }
+
+        } else {
+            int hitung = 0;
+            adrParent temp = L.first;
+
+            // Hitung jumlah elemen dalam list
+            while (temp != nullptr) {
+                hitung++;
+                temp = temp->next;
+            }
+
+            temp = L.first; // Reset ke elemen pertama untuk proses penambahan
+
+            if (baris > hitung + 1) { // Jika baris melebihi jumlah baris + 1
+                P->info = hitung + 1;
+                L.last->next = P;
+                P->prev = L.last;
+                L.last = P;
+                cout << "Baris ke-" << baris << " terlalu jauh dari jumlah baris saat ini (" << hitung << " baris)" << endl;
+                cout << "Baris ke-" << hitung + 1 << " ditambahkan secara otomatis!" << endl;
+                baris = hitung + 1;
+            } else if (baris == hitung + 1) { // Jika baris adalah baris berikutnya
+                L.last->next = P;
+                P->prev = L.last;
+                L.last = P;
+
+                cout << "Baris ke-" << baris << " berhasil ditambahkan!" << endl;
+            } else { // Jika baris berada di tengah atau sudah ada
+                bool sudahAda = false;
+                while (temp != nullptr) {
+                    if (temp->info == baris) {
+                        sudahAda = true;
+                    }
+                    temp = temp->next;
+                }
 
                 temp = L.first; // Reset ke elemen pertama lagi
                 if (sudahAda) {
@@ -473,10 +522,87 @@ void deleteKata(List &L, int baris, int posisi, string kata, OperationStack &red
             cout << "Posisi tidak valid pada baris " << baris << endl;
         }
     } else {
-        cout << "Belum terdapat perubahan"<< endl;
+        cout << "Baris tidak ditemukan!" << endl;
     }
 }
 
-void redo(List &L, Stack &undoStack, Stack &redoStack){
-    
+void undo(List &L, OperationStack &undoStack, OperationStack &redoStack) {
+    if (isEmpty(undoStack)) {
+        cout << "Tidak ada operasi untuk di-undo" << endl;
+    } else {
+        Operation op = pop(undoStack); // Mengambil operasi dari undoStack
+        push(redoStack, op); // Memindahkan ke redoStack
+
+        if (op.type == "insertBaris") {
+            cout << "Undo: Menghapus baris " << op.line << endl;
+            deleteBaris(L, op.line, redoStack, false);
+
+        } else if (op.type == "deleteBaris") {
+            cout << "Undo: Mengembalikan baris " << op.line << endl;
+            insertBaris(L, op.line, redoStack, false);
+
+        } else if (op.type == "insertKata") {
+            cout << "Undo: Menghapus kata '" << op.newData << "' dari baris " << op.line << " dan" << " posisi " << op.position << endl;
+            deleteKata(L, op.line, op.position, op.newData, redoStack, false);
+
+        } else if (op.type == "deleteKata") {
+            cout << "Undo: Mengembalikan kata '" << op.newData << "' dari baris " << op.line << " dan" << " posisi " << op.position << endl;
+            insertKata(L, op.line, op.position, op.newData, redoStack, false);
+
+        } else if (op.type == "replace") {
+            cout << "Undo: Mengganti kata '" << op.newData << "' kembali ke '" << op.oldData << "'" << endl;
+            replaceKata(L, op.newData, op.oldData, redoStack, true);
+
+        } else {
+            cout << "Operasi tidak dikenal untuk undo: " << op.type << endl;
+        }
+    }
+}
+
+void redo(List &L, OperationStack &undoStack, OperationStack &redoStack) {
+    if (isEmpty(redoStack)) {
+        cout << "Tidak ada operasi untuk di-redo";
+
+    } else {
+        Operation op;
+        op = pop(redoStack);
+
+        if (op.type == "insertBaris") {
+            cout << "Redo: Menambahkan kembali baris " << op.line << endl;
+            insertBaris(L, op.line, undoStack, true);
+
+        } else if (op.type == "deleteBaris") {
+            cout << "Redo: Menghapus kembali baris " << op.line << endl;
+            deleteBaris(L, op.line, undoStack, true);
+
+        } else if (op.type == "insertKata") {
+            cout << "Redo: Menambahkan kembali kata '" << op.newData << "' ke baris " << op.line << endl;
+            insertKata(L, op.line, op.position, op.newData, undoStack, true);
+
+        } else if (op.type == "deleteKata") {
+            cout << "Redo: Menghapus kembali kata '" << op.newData << "' ke baris " << op.line << endl;
+            deleteKata(L, op.line, op.position, op.newData, undoStack, true);
+
+        } else if (op.type == "replace") {
+            cout << "Redo: Mengganti kembali kata '" << op.newData << "' ke '" << op.oldData << "'" << endl;
+            replaceKata(L, op.newData, op.oldData, undoStack, true);
+
+        } else {
+            cout << "Operasi tidak dikenal untuk redo: " << op.type << endl;
+        }
+    }
+}
+
+void clearRedo(OperationStack &redoStack) {
+    while (!isEmpty(redoStack)) {
+        pop(redoStack);  // Pop elemen dari stack redo sampai kosong
+    }
+}
+
+void clearScreen() {
+    if (_WIN32) {
+        system("cls"); // untuk Windows
+    } else {
+        system("clear"); // untuk Linux/Mac
+    }
 }
