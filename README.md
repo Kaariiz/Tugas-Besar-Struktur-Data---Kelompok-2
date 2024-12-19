@@ -9,44 +9,41 @@ fleksibelitas kepada pengguna dalam mengelola teks.
 
 
 DESKIRPSI FITUR-FITUR
-1. Menyisipkan teks di posisi tertentu
-   pengguna dapat menambahkan teks baru pada posisi yang diinginkan, baik di awal, tengah, maupun
-   akhir dokumen. operasi ini medukung fleksibelitas dalam menyusun dan mengedit teks.
+1. Insert Baris
+   Fitur ini memungkinkan pengguna menambahkan baris teks baru ke dalam dokumen pada posisi tertentu.
+   Dengan mekanisme ini, pengguna dapat menyisipkan informasi tambahan tanpa mengubah urutan baris lainnya.
 
-2. Menghapus baris tertentu
-   fitur ini memungkinkan pengguna untuk menghapus baris teks tertentu berdasarkan nomor baris,
-   sehingga membantu proses pengeditan dokumen secara efisien.
+2. Delete Baris
+   Fitur ini digunakan untuk menghapus baris tertentu dalam dokumen. Pengguna cukup menentukan nomor
+   baris yang ingin dihapus, dan program akan menghapusnya secara otomatis tanpa memengaruhi baris lain.
 
-3. Menampilkan teks yang disimpan
-   menyediakan kemampuan untuk menampilkan seluruh teks yang telah tersimpan dalam editor. fitur ini
-   mempermudah pengguna dalam meninjau isi dokumen.
+3. Insert Kata
+   Fitur ini memungkinkan pengguna menyisipkan kata tertentu di posisi yang diinginkan dalam sebuah baris.
+   Hal ini berguna untuk menambah informasi atau memperbaiki isi baris tanpa perlu menulis ulang seluruh teks.
 
-4. Fitur undo/redo
-   dengan fitur undo, pengguna dapat membatalkan operasi terakhir yang dilakukan. sebaliknya, fitur
-   redo memungkinkan pengguna untuk mengulangi operasi yang telah dibatalkan sebelumnya.
+4. Replace Kata
+   Fitur ini digunakan untuk mengganti kata tertentu dalam dokumen dengan kata baru.
+   Pengguna hanya perlu menentukan kata yang akan diganti dan penggantinya, dan program akan melakukan perubahan secara otomatis.
 
-5. Pencarian kata
-   fitur ini memudahkan pengguna untuk mencari kata atau frasa tertentu di dalam dokumen. pencarian
-   akan memberikan posisi atau informasi terkait kata yang ditemukan.
+5. Find Kata
+   Fitur pencarian ini memungkinkan pengguna menemukan keberadaan suatu kata atau frasa dalam dokumen.
+   Program akan menampilkan lokasi kata tersebut, baik dalam konteks baris maupun posisi karakter.
 
-6. Penggantian kata
-   memungkinkan pengguna untuk mengganti semua kemunculan kata tertentu dengan kata baru yang diinginkan
-   secara otomatis.
+6. Show All
+   Fitur ini menampilkan seluruh isi dokumen secara lengkap. Pengguna dapat melihat semua teks yang telah
+   dimasukkan atau dimodifikasi dalam program.
 
-7. Navigasi cepat ke baris tertentu
-   fitur ini membantu pengguna langsung menuju ke baris tertentu dalam dokumen, mempercepat proses
-   pengeditan atau peninjauan teks.
+7. Show Per Baris
+   Dengan fitur ini, pengguna dapat memilih untuk menampilkan isi dokumen berdasarkan nomor baris tertentu.
+   Hal ini berguna untuk memeriksa atau memanipulasi baris secara individual.
 
-8. Fitur copy/paste
-   pengguna dapat menyalin bagian tertentu dari teks dan meempelkannya ke posisi lain dalam dokumen.
-   fitur ini mendukung fleksibilitas dalam pengelolaan konten.
+8. Undo
+   Fitur undo memungkinkan pengguna membatalkan tindakan terakhir yang telah dilakukan, seperti penyisipan, penghapusan,
+   atau penggantian teks. Hal ini membantu mencegah kesalahan yang tidak disengaja.
 
-
-
-CARA MENJALANKAN PROGRAM:
-
-
-
+9. Redo
+   Fitur redo memberikan kemampuan untuk mengulang tindakan yang sebelumnya dibatalkan menggunakan fitur undo.
+   Ini memastikan fleksibilitas bagi pengguna dalam menyunting teks.
 
 
 DAFTAR ANGGOTA KELOMPOK:
