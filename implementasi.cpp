@@ -282,7 +282,7 @@ void replaceWord(Document &D, infotype oldWord, infotype newWord, int line, int 
         op.line = line;
         op.position = position;
         op.data = newWord;
-        op.oldData = replacedData;
+        op.oldData = oldWord;
         push(undoStack, op);
     } else {
         cout << "Kata yang ingin diganti tidak cocok!" << endl;
@@ -432,7 +432,7 @@ void redo(Document &D, OperationStack &undoStack, OperationStack &redoStack) {
         }
     } else if (lastOp.action == "replace") {
         // Redo replace = replace lagi ke kata baru
-        replaceWord(D, lastOp.oldData, lastOp.data, lastOp.line, lastOp.position, undoStack);
+        replaceWord(D, lastOp.data, lastOp.oldData, lastOp.line, lastOp.position, undoStack);
     }
 
     cout << "Redo berhasil dilakukan." << endl;

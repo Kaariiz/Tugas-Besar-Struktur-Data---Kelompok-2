@@ -12,7 +12,7 @@ int main() {
 
     int choice;
     while (true) {
-        cout << "\nMenu:\n";
+        cout << "Menu:\n";
         cout << "1. Display Text\n";
         cout << "2. Insert Word\n";
         cout << "3. Delete Word\n";
