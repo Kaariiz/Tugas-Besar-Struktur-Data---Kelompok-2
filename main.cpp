@@ -1,79 +1,122 @@
 #include <iostream>
 #include "header.h"
+#include <cstdlib>
 
 using namespace std;
 
 int main() {
     List L;
-    createList(L);
-    OperationStack undoStack, redoStack;
+    OperationStack undoStack;
+    OperationStack redoStack;
+
+    createListBaris(L);
     createStack(undoStack);
     createStack(redoStack);
 
-    int choice;
-    while (true) {
-        cout << "1. Display Text\n";
-        cout << "2. Insert Word\n";
-        cout << "3. Delete Word\n";
-        cout << "4. Undo\n";
-        cout << "5. Redo\n";
-        cout << "6. Copy-Paste Word\n";
-        cout << "7. Replace Word\n";
-        cout << "8. Find Word\n";
-        cout << "9. Exit\n";
-        cout << "Pilih: ";
-        cin >> choice;
+    int pilihan;
+    bool stop = false;
 
-        if (choice == 1) {
-            displayText(L);
-        } else if (choice == 2) {
-            int line, pos;
-            string word;
-            cout << "Masukkan baris dan posisi: ";
-            cin >> line >> pos;
+    while (!stop) {
+        cout << "====================================" << endl;
+        cout << "           TEXT EDITOR MENU         " << endl;
+        cout << "====================================" << endl;
+        cout << "1. Tambahkan Baris" << endl;
+        cout << "2. Hapus Baris" << endl;
+        cout << "3. Tambahkan Kata ke Baris" << endl;
+        cout << "4. Ganti Kata di Semua Baris" << endl;
+        cout << "5. Cari Kata di Semua Baris" << endl;
+        cout << "6. Tampilkan Kata di Semua Baris" << endl;
+        cout << "7. Tampilkan Kata di Baris Tertentu" << endl;
+        cout << "8. Undo" << endl;
+        cout << "9. Redo" << endl;
+        cout << "0. Keluar" << endl;
+        cout << "==========================" << endl;
+        cout << "Pilih menu (0-9): ";
+        cin >> pilihan;
+        clearScreen();
+
+        if (pilihan == 1) {
+            int baris;
+
+            cout << "Masukkan nomor baris: ";
+            cin >> baris;
+            clearRedo(redoStack);
+            insertBaris(L, baris, undoStack, true);
+
+        } else if (pilihan == 2) {
+            int baris;
+
+            cout << "Masukkan nomor baris yang akan dihapus: ";
+            cin >> baris;
+            clearRedo(redoStack);
+
+            deleteBaris(L, baris, undoStack, true);
+
+        } else if (pilihan == 3) {
+            int baris, posisi;
+            string kata;
+
+            cout << "Masukkan nomor baris: ";
+            cin >> baris;
+
+            cout << "Masukkan posisi kata: ";
+            cin >> posisi;
+
             cout << "Masukkan kata: ";
-            cin >> word;
-            clearRedo(redoStack);  // Menghapus riwayat redo jika ada perubahan baru
-            insertText(L, line, pos, word, undoStack);
-        } else if (choice == 3) {
-            int line, pos;
-            cout << "Masukkan baris dan posisi: ";
-            cin >> line >> pos;
-            deleteWord(L, line, pos, undoStack);
-        } else if (choice == 4) {
-            undo(L, undoStack, redoStack);
-        } else if (choice == 5) {
-            redo(L, undoStack, redoStack);
-        } else if (choice == 6) {
-            int lineSrc, posSrc, lineDest, posDest;
-            string copiedWord;
-            cout << "Masukkan baris dan posisi sumber (line pos): ";
-            cin >> lineSrc >> posSrc;
-            cout << "Masukkan baris dan posisi tujuan (line pos): ";
-            cin >> lineDest >> posDest;
-            copyPaste(L, lineSrc, posSrc, lineDest, posDest, undoStack);
-        } else if (choice == 7) {
-            string oldWord, newWord;
-            int line, pos;
-            cout << "Masukkan kata yang akan diganti: ";
-            cin >> oldWord;
-            cout << "Masukkan kata pengganti: ";
-            cin >> newWord;
-            cout << "Masukkan baris dan posisi: ";
-            cin >> line >> pos;
-            replaceWord(L, oldWord, newWord, line, pos, undoStack);
-        } else if (choice == 8) {
-            string word;
+            cin >> kata;
+            clearRedo(redoStack);
+            insertKata(L, baris, posisi, kata, undoStack, true);
+
+        } else if (pilihan == 4) {
+            string kataLama, kataBaru;
+
+            cout << "Masukkan kata lama: ";
+
+            cin >> kataLama;
+            cout << "Masukkan kata baru: ";
+
+            cin >> kataBaru;
+            clearRedo(redoStack);
+            replaceKata(L, kataLama, kataBaru, undoStack, true);
+
+        } else if (pilihan == 5) {
+            string kata;
+
             cout << "Masukkan kata yang dicari: ";
-            cin >> word;
-            findWord(L, word);
-        } else if (choice == 9) {
-            cout << "Keluar dari program." << endl;
-            break;
+            cin >> kata;
+            findKata(L, kata);
+
+        } else if (pilihan == 6) {
+            showAll(L);
+
+        } else if (pilihan == 7) {
+            int baris;
+
+            cout << "Masukkan nomor baris: ";
+            cin >> baris;
+            showPerbaris(L, baris);
+
+        } else if (pilihan == 8) {
+            undo(L, undoStack, redoStack);
+
+        } else if (pilihan == 9) {
+            redo(L, undoStack, redoStack);
+
+        } else if (pilihan == 0) {
+            stop = true;
+
         } else {
-            cout << "Pilihan tidak valid!" << endl;
+            cout << "Pilihan tidak valid. Silakan coba lagi!" << endl;
+
+        }
+
+        if (!stop) {
+            cout << endl;
         }
     }
+
+    clearScreen();
+    cout << "Keluar dari program. Terima kasih!" << endl;
 
     return 0;
 }
