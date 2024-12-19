@@ -61,8 +61,4 @@ void clearRedo(OperationStack &redoStack);
 
 void clearScreen();
 
-
-
-
-aa
 #endif // HEADER_H_INCLUDED
